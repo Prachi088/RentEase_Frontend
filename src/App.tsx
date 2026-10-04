@@ -40,7 +40,7 @@ export default function App() {
                   <OfflineBanner />
 
                   {/* Main Web Platform Navbar */}
-                  <Navbar onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} />
+                  <Navbar />
 
                   {/* Page Content Body */}
                   <main className="flex-1">

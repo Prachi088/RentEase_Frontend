@@ -54,14 +54,14 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
   }, [user?.id, wishlistIds]);
 
   const handleCancelBooking = async (bookingId: string) => {
-    if (!confirm('Are you sure you wish to cancel this rental booking? Refund will be processed as per platform policy.')) {
+    if (!confirm('Cancel this booking request? RentEase has not processed a payment.')) {
       return;
     }
     const res = await bookingService.cancelBooking(bookingId, 'Cancelled by customer via dashboard.');
     if (res.success && user) {
       const bRes = await bookingService.getBookingsForUser(user.id);
       if (bRes.success && bRes.data) setBookings(bRes.data);
-      alert('Booking cancelled. Refund of security deposit initiated.');
+      alert('Booking request cancelled. No refund was initiated by RentEase.');
     }
   };
 
@@ -124,7 +124,7 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
                   <span>{user.phone}</span>
                   <span>•</span>
                   <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                    <ShieldCheck className="h-3.5 w-3.5" /> Aadhaar KYC Verified
+                    <ShieldCheck className="h-3.5 w-3.5" /> Account registered
                   </span>
                 </div>
               </div>
@@ -153,8 +153,8 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
           {[
             { id: 'bookings', label: 'My Bookings', icon: Calendar, count: bookings.length },
             { id: 'wishlist', label: 'Saved Wishlist', icon: Heart, count: wishlistListings.length },
-            { id: 'payments', label: 'Payments & Receipts', icon: CreditCard, count: payments.length },
-            { id: 'documents', label: 'Rental Agreements', icon: FileText },
+            { id: 'payments', label: 'Payments', icon: CreditCard, count: payments.length },
+            { id: 'documents', label: 'Agreements', icon: FileText },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -311,8 +311,9 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
         {activeTab === 'payments' && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-x-auto">
             <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white mb-4">
-              Escrow & Transaction Ledger
+              Payment history
             </h3>
+            {!payments.length && <p className="mb-4 text-sm text-slate-500">Payment processing is not configured; no payment records are available.</p>}
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[11px]">
@@ -336,11 +337,11 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
                       {p.bookingId}
                     </td>
                     <td className="py-3 px-3 text-slate-500">{p.date}</td>
-                    <td className="py-3 px-3 font-medium">{p.method}</td>
+                    <td className="py-3 px-3 font-medium">{p.paymentMethod}</td>
                     <td className="py-3 px-3">₹{p.amount.toLocaleString('en-IN')}</td>
-                    <td className="py-3 px-3 text-slate-500">₹{p.depositHeld.toLocaleString('en-IN')}</td>
+                    <td className="py-3 px-3 text-slate-500">₹{(p.depositHeld ?? 0).toLocaleString('en-IN')}</td>
                     <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">
-                      ₹{p.totalPaid.toLocaleString('en-IN')}
+                      ₹{(p.totalPaid ?? p.amount).toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-3">
                       <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
@@ -362,7 +363,7 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
                 Digital Rental Agreements
               </h3>
               <p className="text-xs text-slate-500 mb-4">
-                Legally binding digital agreements generated with electronic signatures for all confirmed bookings.
+                Digital agreements are not currently configured. Confirm any agreement directly with the provider.
               </p>
 
               <div className="space-y-3 text-xs">
@@ -384,11 +385,11 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
                     </div>
 
                     <button
-                      onClick={() => alert(`Opening digital PDF agreement for ${b.id}`)}
-                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                      disabled
+                      className="flex items-center gap-1.5 rounded-lg bg-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      <span>View PDF</span>
+                      <span>Unavailable</span>
                     </button>
                   </div>
                 ))}
@@ -404,7 +405,7 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
           <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="font-display text-lg font-bold text-slate-900 dark:text-white">
-                Official Rental Receipt
+                Booking request summary
               </div>
               <button
                 onClick={() => setSelectedBookingForReceipt(null)}
@@ -417,7 +418,7 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
             <div className="py-4 space-y-3 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-400">Receipt No:</span>
-                <span className="font-mono font-bold text-indigo-600">{selectedBookingForReceipt.transactionId}</span>
+                <span className="font-mono font-bold text-indigo-600">Payment not processed</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Booking Reference:</span>
@@ -446,7 +447,7 @@ export const CustomerDashboardPage: React.FC<{ initialTab?: string }> = ({ initi
                   <span>₹{(selectedBookingForReceipt.serviceFee + selectedBookingForReceipt.taxes).toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Security Deposit (Held in Escrow):</span>
+                  <span>Security Deposit (stated by provider):</span>
                   <span>₹{selectedBookingForReceipt.securityDeposit.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold text-sm text-slate-900 dark:text-white">

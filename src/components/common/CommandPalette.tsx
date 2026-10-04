@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOffline } from '../../store/offlineContext';
-import { useAuth } from '../../store/authContext';
 import { useTheme } from '../../store/themeContext';
 import {
   Search,
@@ -18,23 +17,22 @@ import {
   Building,
   ArrowRight,
 } from 'lucide-react';
-import { PlatformRole } from '../../types';
 
-export const CommandPalette: React.FC = () => {
+export const CommandPalette: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen, onClose }) => {
   const { isCommandPaletteOpen, setIsCommandPaletteOpen, setIsSimulatingOffline, isSimulatingOffline } =
     useOffline();
-  const { switchRole } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (isCommandPaletteOpen) {
+    if (isOpen ?? isCommandPaletteOpen) {
       setQuery('');
     }
-  }, [isCommandPaletteOpen]);
+  }, [isOpen, isCommandPaletteOpen]);
 
-  if (!isCommandPaletteOpen) return null;
+  if (!(isOpen ?? isCommandPaletteOpen)) return null;
+  const close = onClose ?? (() => setIsCommandPaletteOpen(false));
 
   const actions = [
     {
@@ -45,7 +43,7 @@ export const CommandPalette: React.FC = () => {
       category: 'Explore',
       action: () => {
         navigate('/search?category=RESIDENTIAL');
-        setIsCommandPaletteOpen(false);
+        close();
       },
     },
     {
@@ -143,7 +141,7 @@ export const CommandPalette: React.FC = () => {
       icon: Building,
       category: 'Demo Persona Switch',
       action: () => {
-        switchRole('PROVIDER');
+        navigate('/provider-dashboard');
         navigate('/provider-dashboard');
         setIsCommandPaletteOpen(false);
       },
@@ -155,7 +153,7 @@ export const CommandPalette: React.FC = () => {
       icon: UserCheck,
       category: 'Demo Persona Switch',
       action: () => {
-        switchRole('ADMIN');
+        navigate('/admin');
         navigate('/admin');
         setIsCommandPaletteOpen(false);
       },
@@ -167,7 +165,7 @@ export const CommandPalette: React.FC = () => {
       icon: UserCheck,
       category: 'Demo Persona Switch',
       action: () => {
-        switchRole('CUSTOMER');
+        navigate('/dashboard');
         navigate('/dashboard');
         setIsCommandPaletteOpen(false);
       },

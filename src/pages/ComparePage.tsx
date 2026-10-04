@@ -283,7 +283,7 @@ export const ComparePage: React.FC = () => {
                 {compareItems.map((item) => (
                   <td key={item.id} className="p-4">
                     <div className="flex flex-wrap gap-1">
-                      {item.amenities.slice(0, 4).map((a, i) => (
+                      {(item.category === 'VEHICLE' ? item.features : item.amenities).slice(0, 4).map((a, i) => (
                         <span
                           key={i}
                           className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300"

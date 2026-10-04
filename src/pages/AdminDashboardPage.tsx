@@ -21,7 +21,6 @@ export const AdminDashboardPage: React.FC = () => {
   const [verifications, setVerifications] = useState<VerificationItem[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [activeTab, setActiveTab] = useState<'verifications' | 'disputes' | 'analytics'>('verifications');
-  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
 
   useEffect(() => {
     const loadAdminData = async () => {
@@ -40,30 +39,6 @@ export const AdminDashboardPage: React.FC = () => {
       setVerifications((prev) => prev.map((v) => (v.id === id ? res.data! : v)));
       alert(`Asset verification status updated to ${status}. Badge updated across marketplace.`);
     }
-  };
-
-  const handleResolveDispute = (disputeId: string, resolution: string) => {
-    setDisputes((prev) =>
-      prev.map((d) =>
-        d.id === disputeId
-          ? {
-              ...d,
-              status: 'RESOLVED',
-              timeline: [
-                ...d.timeline,
-                {
-                  title: 'Dispute Resolved by Admin Desk',
-                  timestamp: 'Just now',
-                  by: 'Platform Mediator',
-                  description: resolution,
-                },
-              ],
-            }
-          : d
-      )
-    );
-    setSelectedDispute(null);
-    alert('Dispute marked as RESOLVED. Escrow funds transferred.');
   };
 
   return (
@@ -97,39 +72,39 @@ export const AdminDashboardPage: React.FC = () => {
             <span className="text-xs font-semibold text-slate-400">Pending Verification Queue</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="font-display text-2xl font-black text-slate-900 dark:text-white">
-                {verifications.filter((v) => v.status === 'PENDING').length}
+                {verifications.filter((v) => v.status === 'SUBMITTED').length}
               </span>
               <span className="text-xs font-bold text-amber-600">Requires Audit</span>
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <span className="text-xs font-semibold text-slate-400">Active Disputes</span>
+            <span className="text-xs font-semibold text-slate-400">Disputes</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="font-display text-2xl font-black text-rose-600 dark:text-rose-400">
                 {disputes.filter((d) => d.status !== 'RESOLVED').length}
               </span>
-              <span className="text-xs font-medium text-slate-500">In Mediation</span>
+              <span className="text-xs font-medium text-slate-500">Unavailable</span>
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <span className="text-xs font-semibold text-slate-400">Verified Marketplace Trust</span>
+            <span className="text-xs font-semibold text-slate-400">Trust metric</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="font-display text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                98.4%
+                —
               </span>
-              <span className="text-xs font-bold text-emerald-600">Compliant</span>
+              <span className="text-xs font-bold text-slate-500">No metric available</span>
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <span className="text-xs font-semibold text-slate-400">Total Escrow Funds</span>
+            <span className="text-xs font-semibold text-slate-400">Payment provider</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="font-display text-2xl font-black text-indigo-600 dark:text-indigo-400">
-                ₹18.4L
+                —
               </span>
-              <span className="text-xs font-medium text-slate-500">Secured in Bank</span>
+              <span className="text-xs font-medium text-slate-500">Payments unavailable</span>
             </div>
           </div>
         </div>
@@ -145,7 +120,7 @@ export const AdminDashboardPage: React.FC = () => {
             }`}
           >
             <FileCheck className="h-4 w-4" />
-            <span>KYC & Asset Title Verification Queue ({verifications.length})</span>
+            <span>Pending listing reviews ({verifications.length})</span>
           </button>
 
           <button
@@ -157,7 +132,7 @@ export const AdminDashboardPage: React.FC = () => {
             }`}
           >
             <AlertTriangle className="h-4 w-4" />
-            <span>Dispute & Mediation Desk ({disputes.length})</span>
+            <span>Disputes (unavailable)</span>
           </button>
         </div>
 
@@ -165,7 +140,7 @@ export const AdminDashboardPage: React.FC = () => {
         {activeTab === 'verifications' && (
           <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-x-auto">
             <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white mb-4">
-              Pending Title Deed & Ownership Document Reviews
+              Pending Listing Reviews
             </h3>
 
             <table className="w-full text-left text-xs border-collapse">
@@ -201,7 +176,7 @@ export const AdminDashboardPage: React.FC = () => {
                         className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
                           v.status === 'VERIFIED'
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                            : v.status === 'PENDING'
+                            : v.status === 'SUBMITTED'
                             ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                             : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                         }`}
@@ -298,32 +273,7 @@ export const AdminDashboardPage: React.FC = () => {
                       ))}
                     </div>
 
-                    {d.status !== 'RESOLVED' && (
-                      <div className="pt-2 flex flex-wrap gap-2">
-                        <button
-                          onClick={() =>
-                            handleResolveDispute(
-                              d.id,
-                              'Refund of security deposit full amount approved and processed directly to customer UPI ID.'
-                            )
-                          }
-                          className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-                        >
-                          Enforce Full Deposit Refund
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleResolveDispute(
-                              d.id,
-                              'Provider repair quote verified. 50% deposit release approved to provider with customer consent.'
-                            )
-                          }
-                          className="rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 dark:bg-slate-700"
-                        >
-                          Settle Split Release
-                        </button>
-                      </div>
-                    )}
+                    <p className="text-xs text-amber-700 dark:text-amber-300">Dispute workflows and payment resolution are not configured.</p>
                   </div>
                 </div>
               </div>

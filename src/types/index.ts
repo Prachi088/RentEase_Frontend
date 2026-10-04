@@ -117,6 +117,7 @@ export interface VehicleListing extends BaseListing {
   transmission: 'AUTOMATIC' | 'MANUAL';
   fuelType: 'PETROL' | 'DIESEL' | 'ELECTRIC' | 'HYBRID';
   seats: number;
+  amenities?: string[];
   mileageLimitKmPerDay?: number;
   deliveryAvailable: boolean;
   helmetIncluded?: boolean;
@@ -190,6 +191,9 @@ export interface PaymentRecord {
   status: PaymentStatus;
   receiptUrl?: string;
   refundAmount?: number;
+  depositHeld?: number;
+  totalPaid?: number;
+  method?: string;
 }
 
 export interface Review {
@@ -241,6 +245,10 @@ export interface VerificationItem {
   status: VerificationStatus;
   lastUpdated: string;
   notes?: string;
+  listingId?: string;
+  listingTitle?: string;
+  listerName?: string;
+  documentType?: string;
 }
 
 export interface NotificationItem {
@@ -282,6 +290,7 @@ export interface SearchFiltersState {
   category: RentalCategory | 'ALL';
   locality?: string;
   keyword?: string;
+  searchQuery?: string;
   minPrice?: number;
   maxPrice?: number;
   listerType?: 'ALL' | 'OWNER' | 'BROKER';

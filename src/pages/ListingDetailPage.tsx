@@ -372,15 +372,15 @@ export const ListingDetailPage: React.FC = () => {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Daily Km Limit</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.kmIncludedDaily} km/day (Extra: ₹{listing.extraKmCharge}/km)</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.mileageLimitKmPerDay ?? 'Not specified'}{listing.mileageLimitKmPerDay ? ' km/day' : ''}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Doorstep Delivery</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.doorstepDeliveryAvailable ? 'Available' : 'Pickup at Hub'}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.deliveryAvailable ? 'Available' : 'Not specified'}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Insurance Status</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.insuranceIncluded ? 'Comprehensive Included' : 'Basic Third-Party'}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">Confirm with provider</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Registration Type</span>
@@ -405,11 +405,11 @@ export const ListingDetailPage: React.FC = () => {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Power Backup</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.powerBackup ? '100% DG Backup' : 'Standard'}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.amenities.includes('Power Backup') ? 'Available' : 'Not specified'}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Lifts / Elevators</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.passengerLifts} High-speed Lifts</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.amenities.includes('Elevator') ? 'Available' : 'Not specified'}</p>
                   </div>
                 </div>
               )}
@@ -430,15 +430,15 @@ export const ListingDetailPage: React.FC = () => {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Catering Policy</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.cateringAllowed ? 'Outside Catering Allowed' : 'In-house Chef Only'}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">Confirm with provider</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Music Curfew</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.musicCurfewTime}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">Confirm with provider</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
                     <span className="text-slate-400 font-medium">Liquor License</span>
-                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">{listing.alcoholPermitted ? 'Permitted (One-day license required)' : 'Not Allowed'}</p>
+                    <p className="mt-1 font-bold text-slate-900 dark:text-white text-sm">Confirm with provider</p>
                   </div>
                 </div>
               )}
@@ -447,10 +447,10 @@ export const ListingDetailPage: React.FC = () => {
             {/* AMENITIES */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
               <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white mb-4">
-                Verified Amenities & Inclusions
+                Listed Amenities
               </h3>
               <div className="flex flex-wrap gap-2">
-                {listing.amenities.map((amenity, i) => (
+                {(listing.category === 'VEHICLE' ? listing.features : listing.amenities).map((amenity, i) => (
                   <span
                     key={i}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
